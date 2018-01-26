@@ -22,7 +22,6 @@ jsy.student.Lab1.plus(3, 4)
 // We can imports all of the functions from jsy.student.Lab1
 import jsy.student.Lab1._
 plus(3, 4)
-
 // We can check the implementation here, though it better to write tests
 // in Lab1Spec.scala.
 assert(plus(1, 1) == 2)
@@ -41,6 +40,13 @@ assert {
 
 // Call the JavaScripty parser (from the provided library) on a string
 jsy.lab1.Parser.parse("-4")
+jsy.lab1.Parser.parse("4")
+val x=jsy.lab1.Parser.parse("5+6")
+x
+1+1
+"1+1"
+jsy.student.Lab1.eval("1+1")
+
 
 // We can import the parse function from jsy.lab1.Parser to experiment
 // with the provided parser.

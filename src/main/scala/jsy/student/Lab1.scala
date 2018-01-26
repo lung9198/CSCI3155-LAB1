@@ -8,9 +8,9 @@ object Lab1 extends jsy.util.JsyApplication with jsy.lab1.Lab1Like {
 
   /*
    * CSCI 3155: Lab 1
-   * <Your Name>
+   * <Luke Nguyen>
    *
-   * Partner: <Your Partner's Name>
+   * Partner: <Joe>
    * Collaborators: <Any Collaborators>
    */
 
@@ -49,23 +49,56 @@ object Lab1 extends jsy.util.JsyApplication with jsy.lab1.Lab1Like {
    * Step 2: Write a test in Lab1Spec.scala, which should initially fail because of the ???.
    * Step 3: Fill in the ??? to finish the implementation to make your test pass.
    */
-
   //def plus(x: Int, y: Int): Int = ???
+
   def plus(x: Int, y: Int): Int = x + y
 
   /* Exercises */
 
-  def abs(n: Double): Double = ???
+  def abs(n: Double): Double = {
+    if (n<0) -n else n
+  }
 
-  def xor(a: Boolean, b: Boolean): Boolean = ???
+  def xor(a: Boolean, b: Boolean): Boolean = {
+    val x = (a, b)
+    x match {
+      case (true, true) => false
+      case (true, false) => true
+      case (false, true) => true
+      case (false, false) => false
+    }
+  }
 
-  def repeat(s: String, n: Int): String = ???
 
-  def sqrtStep(c: Double, xn: Double): Double = ???
+  def repeat(s: String, n: Int): String = {
+    require(n>=0)
+    n match{
+      case 0 => ""
+      case n => s+repeat(s,n-1)
+    }
+  }
 
-  def sqrtN(c: Double, x0: Double, n: Int): Double = ???
+  def sqrtStep(c: Double, xn: Double): Double = {
+    xn - ((xn * xn) - c) / (2 * xn)
+  }
 
-  def sqrtErr(c: Double, x0: Double, epsilon: Double): Double = ???
+  def sqrtN(c: Double, x0: Double, n: Int): Double = {
+    require(n>=0)
+    val x1=sqrtStep(c,x0)
+    n match {
+      case 0 => x0
+      case n => sqrtN(c, x1, n-1)
+    }
+  }
+
+  def sqrtErr(c: Double, x0: Double, epsilon: Double): Double = {
+    require(epsilon>0)
+    val error = (abs((x0*x0)-c) < epsilon)
+    error match {
+      case false => sqrtErr(c,sqrtStep(c,x0),epsilon)
+      case true => x0
+    }
+  }
 
   def sqrt(c: Double): Double = {
     require(c >= 0)
@@ -83,32 +116,82 @@ object Lab1 extends jsy.util.JsyApplication with jsy.lab1.Lab1Like {
   def repOk(t: SearchTree): Boolean = {
     def check(t: SearchTree, min: Int, max: Int): Boolean = t match {
       case Empty => true
-      case Node(l, d, r) => ???
+      case Node(Empty, d, Empty) => if (d<=max) true else false
+      case Node(Empty, d, r) => if (d <= max) check(r,d,max) else false
+      case Node(l, d, Empty) => if (min < d) check(l,min,d) else false
+      case Node(l, d, r) => if ((min < d) && (d <= max)) check(l,min,d) && check(r,d,max) else false
     }
     check(t, Int.MinValue, Int.MaxValue)
   }
 
-  def insert(t: SearchTree, n: Int): SearchTree = ???
+  def insert(t: SearchTree, n: Int): SearchTree = {
+    t match{
+      case Empty => Node(Empty, n, Empty)
+      case Node(Empty, d, Empty) => if (n<d) Node(Node(Empty,n,Empty),d,Empty) else Node(Empty, d, Node(Empty,n,Empty))
+      case Node(l, d, Empty) => if (n>=d) Node(l,d,Node(Empty,n,Empty)) else Node(insert(l, n),d,Empty)
+      case Node(Empty, d, r) => if (n<d) Node(Node(Empty,n,Empty),d,r) else Node(Empty,d,insert(r, n))
+      case Node(l, d, r) => if (n<d) Node(insert(l, n),d,r) else Node(l,d,insert(r, n))
+    }
+  }
 
   def deleteMin(t: SearchTree): (SearchTree, Int) = {
     require(t != Empty)
     (t: @unchecked) match {
+      case Node(Empty, d, Empty) => (Empty, d)
       case Node(Empty, d, r) => (r, d)
       case Node(l, d, r) =>
         val (l1, m) = deleteMin(l)
-        ???
+        (Node(l1,d,r),m)
     }
   }
 
-  def delete(t: SearchTree, n: Int): SearchTree = ???
+  def delete(t: SearchTree, n: Int): SearchTree = {
+    if(t != Empty) {
+      t match {
+        case Node(Empty, d, Empty) => if (n == d) Empty else t
+        case Node(l, d, Empty) => if (n > d) t else if (n == d) l else Node(delete(l, n), d, Empty)
+        case Node(Empty, d, r) => if (n < d) t else if (n == d) r else Node(Empty, d, delete(r, n))
+        case Node(l, d, r) => {
+          if (n < d) Node(delete(l, n), d, r)
+          else if (n > d) Node(l, d, delete(r, n))
+          else {
+            val (l1, m) = deleteMin(r)
+            Node(l, m, l1)
+          }
+        }
+      }
+    }
+    else Empty
+  }
 
   /* JavaScripty */
 
   def eval(e: Expr): Double = e match {
-    case N(n) => ???
-    case _ => ???
+    case N(n) => n
+    case Unary(uop, e1) => {
+      require(isValue(e1))
+      uop match {
+        case Neg => -eval(e1)
+      }
+    }
+    case Binary(bop, e1, e2) => {
+      bop match {
+        case Plus => eval(e1) + eval(e2)
+        case Minus => eval(e1) - eval(e2)
+        case Times => eval(e1) * eval(e2)
+        case Div => {
+          eval(e2) match {
+            case 0 => {
+              if (eval(e1) < 0) {Double.NegativeInfinity}
+              else if (eval(e1) > 0) {Double.PositiveInfinity}
+              else {Double.NaN}
+            }
+            case _ => eval(e1) / eval(e2)
+          }
+        }
+      }
+    }
   }
-
  // Interface to run your interpreter from a string.  This is convenient
  // for unit testing.
  def eval(s: String): Double = eval(Parser.parse(s))

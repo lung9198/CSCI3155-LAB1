@@ -150,6 +150,10 @@ class Lab1Spec(lab1: Lab1Like) extends FlatSpec {
   val t9 = Node(Empty, 2, Node(Empty, 3, Empty))
   val t10 = Node(Node(Empty, 1, Empty), 2, Empty)
   val t11 = Node(Node(Empty, 1, Empty), 3, Empty)
+  val t12 = Node(Empty, 4, Node(Empty, 4, Node(Empty, 5, Empty)))
+  val t13 = Node(t1, 4, Node(Empty, 4, Empty))
+  val t14 = Node(t1, 4, Node(Empty, 5, Empty))
+
 
   // repOk
 
@@ -189,6 +193,9 @@ class Lab1Spec(lab1: Lab1Like) extends FlatSpec {
     assert(delete(t8, 3) === t10)
     assert(delete(t8, 2) === t11)
     assert(delete(t8, 4) === t8)
+    assert(delete(t4, 2) === t12)
+    assert(delete(t4, 5) === t13)
+    assert(delete(t4, 4) === t14)
   }
 
   // Some more testing code that uses the Scala List libray.  The function 'treeFromList'
@@ -224,18 +231,33 @@ class Lab1Spec(lab1: Lab1Like) extends FlatSpec {
 
   "eval+" should "perform addition" in {
     assert(eval("1 + 1") === 2)
+    assert(eval("1 + -1") === 0)
+    assert(eval("-1 + 1") === 0)
+    assert(eval("-1 + -1") === -2)
   }
 
   "eval-" should "perform subtraction" in {
     assert(eval("4 - 2") === 2)
+    assert(eval("4 - -2") === 6)
+    assert(eval("-4 - 2") === -6)
+    assert(eval("-4 - -2") === -2)
   }
 
   "eval*" should "perform multiplication" in {
     assert(eval("4 * 2") === 8)
+    assert(eval("4 * -2") === -8)
+    assert(eval("-4 * 2") === -8)
+    assert(eval("-4 * -2") === 8)
   }
 
   "eval/" should "perform division" in {
     assert(eval("4 / 2") === 2)
+    assert(eval("-4 / -4") === 1)
+    assert(eval("4 / -2") === -2)
+    assert(eval("-4 / 2") === -2)
+    assert(eval("-4 / -2") === 2)
+    assert(eval("0 / -4") === 0)
+    assert(eval("0 / 4") === 0)
   }
 
   "eval/0" should "division by 0 should yield Infinity" in {
